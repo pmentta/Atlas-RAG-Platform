@@ -16,12 +16,23 @@ class FakeQdrantClient:
         self.exists = False
         self.created = False
         self.upsert_called = False
+        self.vector_size = 3
+        self.distance = "cosine"
 
     def collection_exists(self, collection_name: str) -> bool:
         return self.exists
 
     def create_collection(self, **kwargs: object) -> None:
         self.created = True
+
+    def get_collection(self, **kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(
+            config=SimpleNamespace(
+                params=SimpleNamespace(
+                    vectors=SimpleNamespace(size=self.vector_size, distance=self.distance)
+                )
+            )
+        )
 
     def upsert(self, **kwargs: object) -> None:
         self.upsert_called = True
@@ -48,6 +59,25 @@ class QdrantAdapterTests(unittest.TestCase):
     def test_ensure_collection_creates_when_absent(self) -> None:
         self.store.ensure_collection()
         self.assertTrue(self.client.created)
+
+    def test_ensure_collection_validates_existing_schema(self) -> None:
+        self.client.exists = True
+        self.store.ensure_collection()
+        self.assertFalse(self.client.created)
+
+    def test_ensure_collection_raises_when_existing_size_mismatch(self) -> None:
+        self.client.exists = True
+        self.client.vector_size = 99
+
+        with self.assertRaises(VectorStoreInfrastructureError):
+            self.store.ensure_collection()
+
+    def test_ensure_collection_raises_when_existing_distance_mismatch(self) -> None:
+        self.client.exists = True
+        self.client.distance = "dot"
+
+        with self.assertRaises(VectorStoreInfrastructureError):
+            self.store.ensure_collection()
 
     def test_upsert_validates_embedding_size(self) -> None:
         with self.assertRaises(VectorStoreInfrastructureError):

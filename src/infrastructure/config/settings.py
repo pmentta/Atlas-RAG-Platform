@@ -44,6 +44,9 @@ def _read_required_env(name: str, stage: str, remediation: str) -> str:
     raise SettingsError(
         f"Missing required environment variable '{name}' in stage '{stage}'. {remediation}"
     )
+def _read_env(name: str, default: str) -> str:
+    value = os.getenv(name, default).strip()
+    return value or default
 
 
 def load_settings() -> AppSettings:
@@ -73,6 +76,7 @@ def load_settings() -> AppSettings:
         raise SettingsError(
             f"Invalid LOG_LEVEL='{log_level}'. Allowed values: {sorted(_ALLOWED_LOG_LEVELS)}"
         )
+
     if log_format not in _ALLOWED_LOG_FORMATS:
         raise SettingsError(
             f"Invalid LOG_FORMAT='{log_format}'. Allowed values: {sorted(_ALLOWED_LOG_FORMATS)}"
@@ -84,6 +88,7 @@ def load_settings() -> AppSettings:
         raise SettingsError(
             f"Invalid EMBEDDING_SIZE='{embedding_size_raw}'. Expected integer greater than zero."
         ) from error
+
     if embedding_size <= 0:
         raise SettingsError("Invalid EMBEDDING_SIZE. Expected integer greater than zero.")
 
