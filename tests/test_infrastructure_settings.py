@@ -1,0 +1,31 @@
+from __future__ import annotations
+
+import os
+import unittest
+
+from src.infrastructure.config import SettingsError, load_settings
+
+
+class SettingsTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._old_env = dict(os.environ)
+
+    def tearDown(self) -> None:
+        os.environ.clear()
+        os.environ.update(self._old_env)
+
+    def test_load_settings_requires_qdrant_url(self) -> None:
+        os.environ.pop("QDRANT_URL", None)
+        with self.assertRaises(SettingsError):
+            load_settings()
+
+    def test_load_settings_accepts_required_fields(self) -> None:
+        os.environ["QDRANT_URL"] = "http://localhost:6333"
+        os.environ["EMBEDDING_SIZE"] = "384"
+        settings = load_settings()
+        self.assertEqual(settings.qdrant_url, "http://localhost:6333")
+        self.assertEqual(settings.embedding_size, 384)
+
+
+if __name__ == "__main__":
+    unittest.main()
