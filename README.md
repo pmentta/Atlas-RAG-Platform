@@ -7,14 +7,18 @@ Plataforma de Retrieval-Augmented Generation (RAG) construída incrementalmente 
 - Fase concluída: **Fase 0 — Planejamento técnico (sem código)**.
 - Fase concluída: **Fase 1 — Fundação do projeto**.
 - Fase concluída: **Fase 2 — Modelo de domínio**.
-- Fase ativa: **Fase 3 — Vector Store (Qdrant)**.
+- Fase concluída: **Fase 3 — Vector Store (Qdrant)**.
+- Fase ativa: **Fase 5 — Pipeline RAG mínimo**.
 - Plano técnico oficial: `docs/technical-plan.md`.
-- Checklist da fase atual: `docs/phase-3-checklist.md`.
+- Checklist da fase atual: `docs/phase-5-checklist.md`.
 
 ## Execução local
 
 ```bash
 python -m pip install -e .
 python -m unittest discover -s tests -p 'test_*.py'
-QDRANT_URL=http://localhost:6333 python -m src.main
 ```
+
+## Base de conhecimento
+
+Use a pasta `knowledge_base/` para inserir os arquivos `.txt` que serão usados nas próximas etapas de ingestão.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -12,7 +13,7 @@ class VectorSearchResult:
 
     chunk_id: str
     score: float
-    payload: dict[str, object]
+    payload: dict[str, Any]
 
 
 class VectorStorePort(ABC):
@@ -27,7 +28,7 @@ class VectorStorePort(ABC):
         self,
         chunk_id: str,
         embedding: list[float],
-        payload: dict[str, object],
+        payload: dict[str, Any],
     ) -> None:
         """Insert or update one embedding record."""
 
@@ -39,3 +40,19 @@ class VectorStorePort(ABC):
         score_threshold: float | None = None,
     ) -> list[VectorSearchResult]:
         """Search for nearest neighbors by vector similarity."""
+
+
+class EmbeddingPort(ABC):
+    """Port for text embeddings."""
+
+    @abstractmethod
+    def embed_text(self, text: str) -> list[float]:
+        """Generate an embedding vector for one text input."""
+
+
+class GenerationPort(ABC):
+    """Port for text generation over an LLM."""
+
+    @abstractmethod
+    def generate_text(self, prompt: str) -> str:
+        """Generate text from a prompt."""

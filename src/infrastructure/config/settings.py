@@ -21,6 +21,9 @@ class AppSettings:
     qdrant_url: str
     qdrant_collection_name: str
     embedding_size: int
+    gemini_api_key: str
+    gemini_generation_model: str
+    gemini_embedding_model: str
 
 
 _ALLOWED_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -58,10 +61,16 @@ def load_settings() -> AppSettings:
         stage="phase-3-vector-store",
         remediation="Set QDRANT_URL (example: http://localhost:6333).",
     )
-
     qdrant_collection_name = _read_env("QDRANT_COLLECTION_NAME", "atlas_chunks") or "atlas_chunks"
-
     embedding_size_raw = _read_env("EMBEDDING_SIZE", "768") or "768"
+
+    gemini_api_key = _read_required_env(
+        name="GEMINI_API_KEY",
+        stage="phase-5-rag-pipeline",
+        remediation="Set GEMINI_API_KEY with a valid API key from Google AI Studio.",
+    )
+    gemini_generation_model = _read_env("GEMINI_GENERATION_MODEL", "gemini-1.5-flash") or "gemini-1.5-flash"
+    gemini_embedding_model = _read_env("GEMINI_EMBEDDING_MODEL", "models/text-embedding-004") or "models/text-embedding-004"
 
     if log_level not in _ALLOWED_LOG_LEVELS:
         raise SettingsError(
@@ -91,4 +100,7 @@ def load_settings() -> AppSettings:
         qdrant_url=qdrant_url,
         qdrant_collection_name=qdrant_collection_name,
         embedding_size=embedding_size,
+        gemini_api_key=gemini_api_key,
+        gemini_generation_model=gemini_generation_model,
+        gemini_embedding_model=gemini_embedding_model,
     )

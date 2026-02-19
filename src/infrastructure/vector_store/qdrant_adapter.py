@@ -45,10 +45,9 @@ class QdrantVectorStore(VectorStorePort):
         return cls(settings=settings, client=client)
 
     def ensure_collection(self) -> None:
-        """Create collection if absent and validate existing collection schema."""
+        """Create collection if absent, otherwise keep existing collection."""
         try:
             if self._client.collection_exists(collection_name=self._settings.collection_name):
-                self._validate_existing_collection()
                 return
 
             self._client.create_collection(
