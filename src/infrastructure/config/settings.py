@@ -41,6 +41,9 @@ def _read_required_env(name: str, stage: str, remediation: str) -> str:
     raise SettingsError(
         f"Missing required environment variable '{name}' in stage '{stage}'. {remediation}"
     )
+def _read_env(name: str, default: str) -> str:
+    value = os.getenv(name, default).strip()
+    return value or default
 
 
 def load_settings() -> AppSettings:
