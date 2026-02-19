@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlas-rag-platform"
+version = "0.1.0"
+description = "Atlas RAG Platform"
+requires-python = ">=3.11"
+dependencies = [
+  "qdrant-client>=1.9.0",
+  "google-generativeai>=0.8.3",
+  "langsmith>=0.1.147",
+]
