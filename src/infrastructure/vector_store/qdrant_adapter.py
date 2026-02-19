@@ -45,9 +45,10 @@ class QdrantVectorStore(VectorStorePort):
         return cls(settings=settings, client=client)
 
     def ensure_collection(self) -> None:
-        """Create collection if absent, otherwise keep existing collection."""
+        """Create collection if absent and validate existing collection schema."""
         try:
             if self._client.collection_exists(collection_name=self._settings.collection_name):
+                self._validate_existing_collection()
                 return
 
             self._client.create_collection(
@@ -61,6 +62,34 @@ class QdrantVectorStore(VectorStorePort):
             raise VectorStoreInfrastructureError(
                 f"Failed to ensure Qdrant collection '{self._settings.collection_name}'."
             ) from error
+
+    def _validate_existing_collection(self) -> None:
+        """Fail fast when existing collection schema differs from expected settings."""
+        collection_info = self._client.get_collection(collection_name=self._settings.collection_name)
+        configured_vectors = collection_info.config.params.vectors
+
+        if isinstance(configured_vectors, dict):
+            if len(configured_vectors) != 1:
+                raise VectorStoreInfrastructureError(
+                    "Existing Qdrant collection must define exactly one unnamed vector config."
+                )
+            configured_vectors = next(iter(configured_vectors.values()))
+
+        configured_size = getattr(configured_vectors, "size", None)
+        configured_distance = getattr(configured_vectors, "distance", None)
+        expected_distance = qdrant_models.Distance.COSINE
+
+        if configured_size != self._settings.embedding_size:
+            raise VectorStoreInfrastructureError(
+                "Qdrant collection schema mismatch for vector size. "
+                f"Expected {self._settings.embedding_size}, got {configured_size}."
+            )
+
+        if configured_distance != expected_distance:
+            raise VectorStoreInfrastructureError(
+                "Qdrant collection schema mismatch for distance metric. "
+                f"Expected {expected_distance}, got {configured_distance}."
+            )
 
     def upsert_embedding(
         self,
