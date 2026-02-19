@@ -7,3 +7,6 @@ name = "atlas-rag-platform"
 version = "0.1.0"
 description = "Atlas RAG Platform"
 requires-python = ">=3.11"
+dependencies = [
+  "qdrant-client>=1.9.0",
+]
